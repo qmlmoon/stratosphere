@@ -14,12 +14,16 @@
 package eu.stratosphere.example.java.record.wordcount;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import eu.stratosphere.api.common.Plan;
 import eu.stratosphere.api.common.Program;
 import eu.stratosphere.api.common.ProgramDescription;
+import eu.stratosphere.api.common.io.CollectionInputFormat;
+import eu.stratosphere.api.common.operators.CollectionDataSource;
 import eu.stratosphere.api.common.operators.FileDataSink;
 import eu.stratosphere.api.common.operators.FileDataSource;
 import eu.stratosphere.api.java.record.functions.MapFunction;
@@ -78,7 +82,7 @@ public class WordCount implements Program, ProgramDescription {
 	public static class CountWords extends ReduceFunction implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
-		
+
 		@Override
 		public void reduce(Iterator<Record> records, Collector<Record> out) throws Exception {
 			Record element = null;
@@ -108,6 +112,8 @@ public class WordCount implements Program, ProgramDescription {
 		String dataInput = (args.length > 1 ? args[1] : "");
 		String output    = (args.length > 2 ? args[2] : "");
 
+//		CollectionDataSource source = new CollectionDataSource(new Object[][]{{"a",1},{"b",1}});
+//		CollectionDataSource source = new CollectionDataSource("what","some","or","some");
 		FileDataSource source = new FileDataSource(new TextInputFormat(), dataInput, "Input Lines");
 		MapOperator mapper = MapOperator.builder(new TokenizeLine())
 			.input(source)
