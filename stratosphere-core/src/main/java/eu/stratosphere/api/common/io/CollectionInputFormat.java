@@ -35,8 +35,9 @@ public class CollectionInputFormat extends GenericInputFormat<Record> implements
 			currObject = steam.get(pos++);
 			return true;
 		}
-		else
+		else {
 			return false;
+		}
 	}
 	
 	public boolean readRecord(Record target, Object b) {
@@ -47,8 +48,9 @@ public class CollectionInputFormat extends GenericInputFormat<Record> implements
 				target.addField(ValueUtil.toStratosphere(s));
 			}
 		}
-		else
+		else {
 			target.setField(0, ValueUtil.toStratosphere(b));
+		}
 		return true;	
 	}
 	

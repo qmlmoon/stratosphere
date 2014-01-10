@@ -6,6 +6,10 @@ import java.util.List;
 import eu.stratosphere.api.common.io.CollectionInputFormat;
 import eu.stratosphere.api.common.io.GenericInputFormat;
 
+/*
+ * Operator for input nodes which read data from collection.
+ * 
+ */
 public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?>> {
 
 	private static String DEFAULT_NAME = "<Unnamed Collection Data Source>";
@@ -41,10 +45,12 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 		List<String> typeList = new ArrayList<String>();
 		for (Object o : data) {
 			//check the input types for 1-dimension
-			if (type != null && !type.equals(o.getClass().getName()))
+			if (type != null && !type.equals(o.getClass().getName())) {
 				throw new RuntimeException("elements of input list should have the same type");
-			else
+			}
+			else {
 				type = o.getClass().getName();
+			}
 		
 			//check the input types for 2-dimension
 			if (typeList.size() == 0 && o.getClass().getName().equals("[Ljava.lang.Object;")) {
@@ -54,11 +60,13 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 			}
 			else if (o.getClass().getName().equals("[Ljava.lang.Object;")) {
 				int index = 0;
-				if (((Object[])o).length != typeList.size())
+				if (((Object[])o).length != typeList.size()) {
 					throw new RuntimeException("elements of input list should have the same size");
+				}
 				for (Object s:(Object[])o) 
-					if (!s.getClass().getName().equals(typeList.get(index++)))
+					if (!s.getClass().getName().equals(typeList.get(index++))) {
 						throw new RuntimeException("elements of input list should have the same type");
+					}
 			}
 			
 			this.data.add(o);
@@ -81,17 +89,9 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 		this(new CollectionInputFormat(), args);
 	}
 	
-//	public CollectionDataSource(List<Object> data) {
-//		this(new CollectionInputFormat(), data);
-//	}
-
 
 	
-	/**
-	 * Returns the file path from which the input is read.
-	 * 
-	 * @return The path from which the input shall be read.
-	 */
+	
 	public List<Object> getData() {
 		return this.data;
 	}
