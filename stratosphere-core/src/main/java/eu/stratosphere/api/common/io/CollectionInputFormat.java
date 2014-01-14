@@ -1,27 +1,30 @@
 package eu.stratosphere.api.common.io;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 
+import eu.stratosphere.api.common.operators.util.SerializableIterator;
+import eu.stratosphere.core.io.GenericInputSplit;
 import eu.stratosphere.types.Record;
 import eu.stratosphere.types.ValueUtil;
 
-/*
- * input format for the non-file input
+/**
+ * input format for java collection input. It can accept collection data or serializable iterator
+ * @author qml_moon
  */
 public class CollectionInputFormat extends GenericInputFormat<Record> implements UnsplittableInput {
 
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	private transient boolean end;
 	
-	private List<Object> steam;
+	private Collection<Object> steam;		//input data as collection
 	
-	protected int pos;
+	private SerializableIterator<Object> serializableIter;	//input data as serializable iterator
+	
+	private transient Iterator<Object> it;
 	
 	private transient Object currObject;
 	
@@ -30,21 +33,36 @@ public class CollectionInputFormat extends GenericInputFormat<Record> implements
 		return this.end;
 	}
 
+	/**
+	 * get the next Object
+	 */
 	public boolean readObject() {
-		if (pos < steam.size()) {
-			currObject = steam.get(pos++);
+		if (it.hasNext()) {
+			currObject = it.next();
 			return true;
 		}
 		else {
 			return false;
 		}
 	}
-	
+
+	/**
+	 * decode the record from one Object. The record could have multiple fields.
+	 */
 	public boolean readRecord(Record target, Object b) {
 		target.clear();
 		//check whether the record field is one-dimensional or multi-dimensional
-		if (b.getClass().getName().equals("[Ljava.lang.Object;")) {
+		if (b.getClass().isArray()) {
 			for (Object s : (Object[])b){
+				target.addField(ValueUtil.toStratosphere(s));
+			}
+		}
+		else if (b instanceof Collection) {
+			@SuppressWarnings("unchecked")
+			Iterator<Object> tmp_it = ((Collection<Object>) b).iterator();
+			while (tmp_it.hasNext())
+			{
+				Object s = tmp_it.next();
 				target.addField(ValueUtil.toStratosphere(s));
 			}
 		}
@@ -52,6 +70,15 @@ public class CollectionInputFormat extends GenericInputFormat<Record> implements
 			target.setField(0, ValueUtil.toStratosphere(b));
 		}
 		return true;	
+	}
+	
+	@Override
+	public void open(GenericInputSplit split) throws IOException {
+		this.partitionNumber = split.getSplitNumber();
+		if (serializableIter != null)
+			it = serializableIter;
+		else
+			it = this.steam.iterator();
 	}
 	
 	@Override
@@ -64,11 +91,13 @@ public class CollectionInputFormat extends GenericInputFormat<Record> implements
 		}
 	}
 	
-	public void setData(List<Object> data) {
-		this.steam = new ArrayList<Object>(data);
-		pos = 0;
+	public void setData(Collection<Object> data) {
+		this.steam = data;
+		this.serializableIter = null;
+	}
+	
+	public void setIter(SerializableIterator<Object> iter) {
+		this.serializableIter = iter;
 	}
 
-	
-	
 }

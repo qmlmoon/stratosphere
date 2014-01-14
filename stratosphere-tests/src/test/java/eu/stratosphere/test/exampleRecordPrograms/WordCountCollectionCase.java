@@ -3,6 +3,7 @@ package eu.stratosphere.test.exampleRecordPrograms;
 import eu.stratosphere.api.common.Plan;
 import eu.stratosphere.api.common.operators.CollectionDataSource;
 import eu.stratosphere.api.common.operators.FileDataSink;
+import eu.stratosphere.api.common.operators.util.SerializableIterator;
 import eu.stratosphere.api.java.record.io.CsvOutputFormat;
 import eu.stratosphere.api.java.record.operators.MapOperator;
 import eu.stratosphere.api.java.record.operators.ReduceOperator;
@@ -11,9 +12,31 @@ import eu.stratosphere.example.java.record.wordcount.WordCount;
 import eu.stratosphere.types.IntValue;
 import eu.stratosphere.types.StringValue;
 
-public class WordCountCollectionCase extends WordCountITCase {
 
-	/*
+/**
+ * test the collection and iterator data input using Wordcount example
+ * @author qml_moon
+ *
+ */
+public class WordCountCollectionCase extends WordCountITCase {
+	
+	@SuppressWarnings("hiding")
+	public static class SerializableIteratorTest<Object> implements SerializableIterator<Object> {
+	
+		private static final long serialVersionUID = 1L;
+			private String[] s = TEXT.split("\n");
+			private int pos = 0;
+		    public void remove() {}
+		    @SuppressWarnings("unchecked")
+			public Object next() {
+		        return (Object) s[pos++];
+		    }
+		    public boolean hasNext() {
+		        return pos < s.length;
+		    }
+	}
+	
+	/**
 	 * modify the input format from file into collection
 	 */
 	public class WordCountCollection extends WordCount {
@@ -22,8 +45,20 @@ public class WordCountCollectionCase extends WordCountITCase {
 			// parse job parameters
 			int numSubTasks   = Integer.parseInt(arg1);
 			String output    = arg2;
+			
+			/*
+			 * uncomment this to test List input.
+			 */
+//			List<Object> tmp= new ArrayList<Object>();
+//			for (String s: TEXT.split("\n")) {
+//				
+//				tmp.add(s);
+//			}
+//			CollectionDataSource source = new CollectionDataSource(tmp);
+			
+			//test serializable iterator input
+			CollectionDataSource source = new CollectionDataSource(new SerializableIteratorTest<Object>());
 
-			CollectionDataSource source = new CollectionDataSource(TEXT.split("\n"));
 			MapOperator mapper = MapOperator.builder(new TokenizeLine())
 				.input(source)
 				.name("Tokenize Lines")
