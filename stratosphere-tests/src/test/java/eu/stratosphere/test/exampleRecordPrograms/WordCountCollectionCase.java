@@ -21,12 +21,12 @@ import eu.stratosphere.types.StringValue;
 public class WordCountCollectionCase extends WordCountITCase {
 	
 	@SuppressWarnings("hiding")
-	public static class SerializableIteratorTest<Object> implements SerializableIterator<Object> {
+	public static class SerializableIteratorTest<Object> extends SerializableIterator<Object> {
 	
 		private static final long serialVersionUID = 1L;
 			private String[] s = TEXT.split("\n");
 			private int pos = 0;
-		    public void remove() {}
+		  
 		    @SuppressWarnings("unchecked")
 			public Object next() {
 		        return (Object) s[pos++];

@@ -48,6 +48,9 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 		if (data.length == 1 && data[0] instanceof SerializableIterator) {
 			f.setIter((SerializableIterator<Object>)data[0]);
 		}
+		else if (data.length == 1 && data[0] instanceof Collection) {
+			f.setData((Collection<Object>)data[0]);
+		}
 		else {
 			for (Object o : data) {
 				data_tmp.add(o);

@@ -7,16 +7,14 @@ import java.util.Iterator;
  * Interface for serializable iterator
  * @author qml_moon
  */
-public interface SerializableIterator<E> extends Iterator<E>, Serializable {
+public abstract class SerializableIterator<E> implements Iterator<E>, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-		@Override
-		public boolean hasNext();
-
-		@Override
-		public E next();
-
-		@Override
-		public void remove();
+	@Override
+	public final void remove() {}
 		
 }
