@@ -4,36 +4,48 @@ import eu.stratosphere.api.common.Plan;
 import eu.stratosphere.api.common.operators.CollectionDataSource;
 import eu.stratosphere.api.common.operators.FileDataSink;
 import eu.stratosphere.api.common.operators.util.SerializableIterator;
+import eu.stratosphere.api.java.record.functions.JoinFunction;
 import eu.stratosphere.api.java.record.io.CsvOutputFormat;
+import eu.stratosphere.api.java.record.operators.JoinOperator;
 import eu.stratosphere.api.java.record.operators.MapOperator;
 import eu.stratosphere.api.java.record.operators.ReduceOperator;
 import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.example.java.record.wordcount.WordCount;
 import eu.stratosphere.types.IntValue;
+import eu.stratosphere.types.Record;
 import eu.stratosphere.types.StringValue;
+import eu.stratosphere.util.Collector;
 
 
 /**
  * test the collection and iterator data input using Wordcount example
- * @author qml_moon
  *
  */
 public class WordCountCollectionCase extends WordCountITCase {
-	
-	@SuppressWarnings("hiding")
-	public static class SerializableIteratorTest<Object> extends SerializableIterator<Object> {
+	public static class Join extends JoinFunction {
+
+        @Override
+        public void match(Record value1, Record value2, Collector<Record> out) throws Exception {
+            
+        }
+    }
+
+	public static class SerializableIteratorTest<String> extends SerializableIterator<Object> {
 	
 		private static final long serialVersionUID = 1L;
-			private String[] s = TEXT.split("\n");
+			private String[] s;
 			private int pos = 0;
-		  
-		    @SuppressWarnings("unchecked")
-			public Object next() {
-		        return (Object) s[pos++];
-		    }
-		    public boolean hasNext() {
-		        return pos < s.length;
-		    }
+
+        public SerializableIteratorTest(String[] arg) {
+            s = arg;
+        }
+
+        public String next() {
+            return s[pos++];
+        }
+        public boolean hasNext() {
+            return pos < s.length;
+        }
 	}
 	
 	/**
@@ -57,12 +69,14 @@ public class WordCountCollectionCase extends WordCountITCase {
 //			CollectionDataSource source = new CollectionDataSource(tmp);
 			
 			//test serializable iterator input
-			CollectionDataSource source = new CollectionDataSource(new SerializableIteratorTest<Object>());
+			CollectionDataSource source = new CollectionDataSource(new SerializableIteratorTest<Object>(TEXT.split("\n")));
 
 			MapOperator mapper = MapOperator.builder(new TokenizeLine())
 				.input(source)
 				.name("Tokenize Lines")
 				.build();
+
+            JoinOperator join - JoinOperator.builder(Join.class)
 			ReduceOperator reducer = ReduceOperator.builder(CountWords.class, StringValue.class, 0)
 				.input(mapper)
 				.name("Count Words")

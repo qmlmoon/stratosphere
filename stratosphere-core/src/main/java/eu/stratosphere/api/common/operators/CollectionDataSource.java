@@ -11,7 +11,7 @@ import eu.stratosphere.api.common.operators.util.SerializableIterator;
 
 /**
  * Operator for input nodes which reads data from collection or iterator.
- * @author qml_moon
+ * 
  */
 public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?>> {
 
@@ -24,7 +24,7 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 	 * Creates a new instance for the given input using the given input format.
 	 * 
 	 * @param f The {@link CollectionInputFormat} implementation used to read the data.
-	 * @param data The input data. It should be a collection, an array or a serializable iterator of object.
+	 * @param data The input data. It should be a collection, an array or a {@link SerializableIterator}.
 	 * @param name The given name for the Pact, used in plans, logs and progress messages.
 	 */
 	public CollectionDataSource(CollectionInputFormat f, Collection<Object> data, String name) {
@@ -38,13 +38,11 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 	 * The input types will be checked. If the input types don't agree, an exception will occur.
 	 * 
 	 * @param f The {@link CollectionInputFormat} implementation used to read the data.
-	 * @param data The input data. It should be a collection, an array or a serializable iterator of object.
+	 * @param data The input data. It should be a collection, an array or a {@link SerializableIterator}.
 	 */
 	@SuppressWarnings("unchecked")
 	public CollectionDataSource(CollectionInputFormat f, Object[] data) {
 		super(f, DEFAULT_NAME);
-		Collection<Object> data_tmp = new ArrayList<Object>();
-		
 		if (data.length == 1 && data[0] instanceof SerializableIterator) {
 			f.setIter((SerializableIterator<Object>)data[0]);
 		}
@@ -52,11 +50,12 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 			f.setData((Collection<Object>)data[0]);
 		}
 		else {
+			Collection<Object> tmp = new ArrayList<Object>();
 			for (Object o : data) {
-				data_tmp.add(o);
+				tmp.add(o);
 			}
-			checkFormat(data_tmp);
-			f.setData(data_tmp);
+			checkFormat(tmp);
+			f.setData(tmp);
 		}
 		
 	}
@@ -66,7 +65,7 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 	 * Creates a new instance for the given input using the given input format. The contract has the default name.
 	 * The input types will be checked. If the input types don't agree, an exception will occur.
 	 * 
-	 * @param data The input data. It should be a collection, an array or a serializable iterator of object.
+	 * @param args The input data. It should be a collection, an array or a {@link SerializableIterator}.
 	 */
 	public CollectionDataSource(Object... args) {
 		this(new CollectionInputFormat(), args);
@@ -121,19 +120,19 @@ public class CollectionDataSource extends GenericDataSource<GenericInputFormat<?
 			//check the input types for 2-dimension collection
 			if (typeList.size() == 0 && o instanceof Collection) {
 				@SuppressWarnings("unchecked")
-				Iterator<Object> tmp_it = ((Collection<Object>) o).iterator();
-				while (tmp_it.hasNext())
+				Iterator<Object> tmpIt = ((Collection<Object>) o).iterator();
+				while (tmpIt.hasNext())
 				{
-					Object s = tmp_it.next();
+					Object s = tmpIt.next();
 					typeList.add(s.getClass().getName());
 				}
 			}
 			else if (o instanceof Collection) {
 				int index = 0;
 				@SuppressWarnings("unchecked")
-				Iterator<Object> tmp_it = ((Collection<Object>) o).iterator();
-				while (tmp_it.hasNext()) {
-					Object s = tmp_it.next();
+				Iterator<Object> tmpIt = ((Collection<Object>) o).iterator();
+				while (tmpIt.hasNext()) {
+					Object s = tmpIt.next();
 					if (!s.getClass().getName().equals(typeList.get(index++))) {
 						throw new RuntimeException("elements of input list should have the same type");
 					}

@@ -11,7 +11,7 @@ import eu.stratosphere.types.ValueUtil;
 
 /**
  * input format for java collection input. It can accept collection data or serializable iterator
- * @author qml_moon
+ * 
  */
 public class CollectionInputFormat extends GenericInputFormat<Record> implements UnsplittableInput {
 

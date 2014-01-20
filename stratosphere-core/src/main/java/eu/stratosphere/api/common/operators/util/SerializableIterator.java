@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 /**
  * Interface for serializable iterator
- * @author qml_moon
+ * 
  */
 public abstract class SerializableIterator<E> implements Iterator<E>, Serializable {
 

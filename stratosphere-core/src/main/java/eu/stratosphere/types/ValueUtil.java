@@ -1,6 +1,6 @@
 package eu.stratosphere.types;
 
-/*
+/**
  * convert the java.lang type into stratosphere type
  */
 public class ValueUtil {
@@ -25,9 +25,9 @@ public class ValueUtil {
 			return new ShortValue(((java.lang.Short)java).shortValue());
 		if (java instanceof java.lang.String)
 			return new StringValue(((java.lang.String)java).toString());
-		
-		return NullValue.getInstance();
-		
+		if (java == null)
+		    return NullValue.getInstance();
+		throw new IllegalArgumentException("unsupported java value");
 		
 	}
 }

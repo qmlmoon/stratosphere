@@ -64,9 +64,14 @@ object DataSource {
 }
 
 object CollectionDataSource {
-  
+  /*
+  constructor for collection input
+   */
   def apply[Out: UDT](data: Iterable[Out]):DataSet[Out] with OutputHintable[Out] = {
-   val js:java.util.Collection[Out] = data
+    /*
+    reuse the java implementation of collection data by adding scala operator
+    */
+    val js:java.util.Collection[Out] = data
     val ret = new JavaCollectionDataSource(js)
     	with ScalaOperator[Out]{
        
@@ -78,9 +83,14 @@ object CollectionDataSource {
     new DataSet[Out](ret) with OutputHintable[Out] {}
   }
   
-  
-  def apply[Out: UDT](data: SerializableIterator[Out]):DataSet[Out] with OutputHintable[Out] = {
-  
+  /*
+  constructor for {@link SerializableIterator} input
+   */
+  def apply[Out: UDT](data: SerializableIterator[Out]) = {
+
+    /*
+    reuse the java implementation of collection data by adding scala operator
+     */
     val ret = new JavaCollectionDataSource(data)
     	with ScalaOperator[Out]{
        
